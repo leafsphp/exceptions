@@ -10,7 +10,6 @@ use ArrayAccess;
 use ArrayIterator;
 use Countable;
 use IteratorAggregate;
-use ReturnTypeWillChange;
 use Serializable;
 use UnexpectedValueException;
 
@@ -18,7 +17,7 @@ use UnexpectedValueException;
  * Exposes a fluent interface for dealing with an ordered list
  * of stack-trace frames.
  */
-class FrameCollection
+class FrameCollection implements ArrayAccess, IteratorAggregate, Serializable, Countable
 {
     /**
      * @var array[]
@@ -168,16 +167,6 @@ class FrameCollection
     public function unserialize($serializedFrames)
     {
         $this->frames = unserialize($serializedFrames);
-    }
-
-    public function __serialize()
-    {
-        return $this->frames;
-    }
-
-    public function __unserialize(array $serializedFrames)
-    {
-        $this->frames = $serializedFrames;
     }
 
     /**

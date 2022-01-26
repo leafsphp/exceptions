@@ -74,7 +74,7 @@ final class Run implements RunInterface
     /**
      * Explicitly request your handler runs as the last of all currently registered handlers.
      *
-     * @param callable|HandlerInterface $handler
+     * @param HandlerInterface $handler
      *
      * @return Run
      */
@@ -87,7 +87,7 @@ final class Run implements RunInterface
     /**
      * Explicitly request your handler runs as the first of all currently registered handlers.
      *
-     * @param callable|HandlerInterface $handler
+     * @param HandlerInterface $handler
      *
      * @return Run
      */
@@ -100,7 +100,7 @@ final class Run implements RunInterface
      * Register your handler as the last of all currently registered handlers (to be executed first).
      * Prefer using appendHandler and prependHandler for clarity.
      *
-     * @param callable|HandlerInterface $handler
+     * @param Callable|HandlerInterface $handler
      *
      * @return Run
      *
@@ -175,10 +175,10 @@ final class Run implements RunInterface
         if (!$this->isRegistered) {
             // Workaround PHP bug 42098
             // https://bugs.php.net/bug.php?id=42098
-            class_exists("\\Leaf\Exception\\Exception\\ErrorException");
-            class_exists("\\Leaf\Exception\\Exception\\FrameCollection");
-            class_exists("\\Leaf\Exception\\Exception\\Frame");
-            class_exists("\\Leaf\Exception\\Exception\\Inspector");
+            class_exists("\\Leaf\\Exceptions\\ErrorException");
+            class_exists("\\Leaf\\Exceptions\\FrameCollection");
+            class_exists("\\Leaf\\Exceptions\\Frame");
+            class_exists("\\Leaf\\Exceptions\\Inspector");
 
             $this->system->setErrorHandler([$this, self::ERROR_HANDLER]);
             $this->system->setExceptionHandler([$this, self::EXCEPTION_HANDLER]);
@@ -501,7 +501,7 @@ final class Run implements RunInterface
     /**
      * Resolves the giving handler.
      *
-     * @param callable|HandlerInterface $handler
+     * @param HandlerInterface $handler
      *
      * @return HandlerInterface
      *

@@ -76,7 +76,7 @@ interface RunInterface
      *
      * @param  array|string $patterns List or a single regex pattern to match
      * @param  int          $levels   Defaults to E_STRICT | E_DEPRECATED
-     * @return \Leaf\Exception\Run
+     * @return \Whoops\Run
      */
     public function silenceErrorsInPaths($patterns, $levels = 10240);
 

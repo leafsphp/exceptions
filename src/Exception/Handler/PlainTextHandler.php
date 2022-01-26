@@ -226,7 +226,7 @@ class PlainTextHandler extends Handler
 
     /**
      * Get the frame args var_dump.
-     * @param  \Leaf\Exceptions\Frame $frame [description]
+     * @param  \Whoops\Exception\Frame $frame [description]
      * @param  integer                 $line  [description]
      * @return string
      */
