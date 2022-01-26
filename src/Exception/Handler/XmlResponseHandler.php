@@ -4,10 +4,10 @@
  * @author Filipe Dobreira <http://github.com/filp>
  */
 
-namespace Whoops\Handler;
+namespace Leaf\Exception\Handler;
 
 use SimpleXMLElement;
-use Whoops\Exception\Formatter;
+use Leaf\Exceptions\Formatter;
 
 /**
  * Catches an exception and converts it to an XML

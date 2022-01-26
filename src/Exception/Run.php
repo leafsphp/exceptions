@@ -4,17 +4,17 @@
  * @author Filipe Dobreira <http://github.com/filp>
  */
 
-namespace Whoops;
+namespace Leaf\Exception;
 
 use InvalidArgumentException;
 use Throwable;
-use Whoops\Exception\ErrorException;
-use Whoops\Exception\Inspector;
-use Whoops\Handler\CallbackHandler;
-use Whoops\Handler\Handler;
-use Whoops\Handler\HandlerInterface;
-use Whoops\Util\Misc;
-use Whoops\Util\SystemFacade;
+use Leaf\Exceptions\ErrorException;
+use Leaf\Exceptions\Inspector;
+use Leaf\Exception\Handler\CallbackHandler;
+use Leaf\Exception\Handler\Handler;
+use Leaf\Exception\Handler\HandlerInterface;
+use Leaf\Exception\Util\Misc;
+use Leaf\Exception\Util\SystemFacade;
 
 final class Run implements RunInterface
 {
@@ -175,10 +175,10 @@ final class Run implements RunInterface
         if (!$this->isRegistered) {
             // Workaround PHP bug 42098
             // https://bugs.php.net/bug.php?id=42098
-            class_exists("\\Whoops\\Exception\\ErrorException");
-            class_exists("\\Whoops\\Exception\\FrameCollection");
-            class_exists("\\Whoops\\Exception\\Frame");
-            class_exists("\\Whoops\\Exception\\Inspector");
+            class_exists("\\Leaf\Exception\\Exception\\ErrorException");
+            class_exists("\\Leaf\Exception\\Exception\\FrameCollection");
+            class_exists("\\Leaf\Exception\\Exception\\Frame");
+            class_exists("\\Leaf\Exception\\Exception\\Inspector");
 
             $this->system->setErrorHandler([$this, self::ERROR_HANDLER]);
             $this->system->setExceptionHandler([$this, self::EXCEPTION_HANDLER]);

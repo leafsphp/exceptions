@@ -4,13 +4,13 @@
  * @author Filipe Dobreira <http://github.com/filp>
  */
 
-namespace Whoops\Util;
+namespace Leaf\Exception\Util;
 
 use Symfony\Component\VarDumper\Caster\Caster;
 use Symfony\Component\VarDumper\Cloner\AbstractCloner;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Symfony\Component\VarDumper\Dumper\HtmlDumper;
-use Whoops\Exception\Frame;
+use Leaf\Exceptions\Frame;
 
 /**
  * Exposes useful tools for working with/in templates

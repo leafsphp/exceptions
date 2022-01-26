@@ -4,7 +4,7 @@
  * @author Filipe Dobreira <http://github.com/filp>
  */
 
-namespace Whoops\Util;
+namespace Leaf\Exception\Util;
 
 class Misc
 {
@@ -57,7 +57,7 @@ class Misc
         }
         return "E_UNKNOWN";
     }
-    
+
     /**
      * Determine if an error level is fatal (halts execution)
      *

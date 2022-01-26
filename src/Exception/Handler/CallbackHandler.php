@@ -4,7 +4,7 @@
  * @author Filipe Dobreira <http://github.com/filp>
  */
 
-namespace Whoops\Handler;
+namespace Leaf\Exception\Handler;
 
 use InvalidArgumentException;
 

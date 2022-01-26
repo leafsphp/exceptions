@@ -4,16 +4,16 @@
  * @author Filipe Dobreira <http://github.com/filp>
  */
 
-namespace Whoops\Handler;
+namespace Leaf\Exception\Handler;
 
 use InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\VarDumper\Cloner\AbstractCloner;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
 use UnexpectedValueException;
-use Whoops\Exception\Formatter;
-use Whoops\Util\Misc;
-use Whoops\Util\TemplateHelper;
+use Leaf\Exceptions\Formatter;
+use Leaf\Exception\Util\Misc;
+use Leaf\Exception\Util\TemplateHelper;
 
 class PrettyPageHandler extends Handler
 {
@@ -300,7 +300,7 @@ class PrettyPageHandler extends Handler
     /**
      * Get the stack trace frames of the exception currently being handled.
      *
-     * @return \Whoops\Exception\FrameCollection
+     * @return mixed
      */
     protected function getExceptionFrames()
     {
@@ -383,7 +383,7 @@ class PrettyPageHandler extends Handler
             throw new InvalidArgumentException('Expecting callback argument to be callable');
         }
 
-        $this->extraTables[$label] = function (\Whoops\Exception\Inspector $inspector = null) use ($callback) {
+        $this->extraTables[$label] = function (\Leaf\Exceptions\Inspector $inspector = null) use ($callback) {
             try {
                 $result = call_user_func($callback, $inspector);
 

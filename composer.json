@@ -1,13 +1,26 @@
 {
-    "name": "filp/whoops",
+    "name": "leafs/exception",
     "license": "MIT",
-    "description": "php error handling for cool kids",
-    "keywords": ["library", "error", "handling", "exception", "whoops", "throwable"],
-    "homepage": "https://filp.github.io/whoops/",
+    "description": "Error handler for leaf (fork of whoops)",
+    "keywords": [
+        "library",
+        "error",
+        "handling",
+        "exception",
+        "whoops",
+        "throwable"
+    ],
+    "homepage": "https://github.com/leafsphp/exception",
     "authors": [
         {
             "name": "Filipe Dobreira",
             "homepage": "https://github.com/filp",
+            "role": "Developer"
+        },
+        {
+            "name": "Michael Darko",
+            "email": "mickdd22@gmail.com",
+            "homepage": "https://mychi.netlify.app",
             "role": "Developer"
         }
     ],
@@ -29,17 +42,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Whoops\\": "src/Whoops/"
+            "Leaf\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Whoops\\": "tests/Whoops/"
-        }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "2.7-dev"
+            "Leaf\\": "tests/Whoops/"
         }
     }
 }

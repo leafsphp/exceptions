@@ -4,7 +4,7 @@
  * @author Filipe Dobreira <http://github.com/filp>
  */
 
-namespace Whoops\Util;
+namespace Leaf\Exception\Util;
 
 class SystemFacade
 {

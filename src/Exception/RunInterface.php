@@ -4,11 +4,11 @@
  * @author Filipe Dobreira <http://github.com/filp>
  */
 
-namespace Whoops;
+namespace Leaf\Exception;
 
 use InvalidArgumentException;
-use Whoops\Exception\ErrorException;
-use Whoops\Handler\HandlerInterface;
+use Leaf\Exceptions\ErrorException;
+use Leaf\Exception\Handler\HandlerInterface;
 
 interface RunInterface
 {
@@ -76,7 +76,7 @@ interface RunInterface
      *
      * @param  array|string $patterns List or a single regex pattern to match
      * @param  int          $levels   Defaults to E_STRICT | E_DEPRECATED
-     * @return \Whoops\Run
+     * @return \Leaf\Exception\Run
      */
     public function silenceErrorsInPaths($patterns, $levels = 10240);
 

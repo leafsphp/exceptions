@@ -4,10 +4,10 @@
  * @author Filipe Dobreira <http://github.com/filp>
  */
 
-namespace Whoops\Handler;
+namespace Leaf\Exception\Handler;
 
-use Whoops\Exception\Inspector;
-use Whoops\RunInterface;
+use Leaf\Exceptions\Inspector;
+use Leaf\Exception\RunInterface;
 
 interface HandlerInterface
 {

@@ -6,11 +6,11 @@
 * @author Pierre-Yves Landuré <https://howto.biapy.com/>
 */
 
-namespace Whoops\Handler;
+namespace Leaf\Exception\Handler;
 
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
-use Whoops\Exception\Frame;
+use Leaf\Exceptions\Frame;
 
 /**
 * Handler outputing plaintext error messages. Can be used
@@ -226,7 +226,7 @@ class PlainTextHandler extends Handler
 
     /**
      * Get the frame args var_dump.
-     * @param  \Whoops\Exception\Frame $frame [description]
+     * @param  \Leaf\Exceptions\Frame $frame [description]
      * @param  integer                 $line  [description]
      * @return string
      */
