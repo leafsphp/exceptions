@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Whoops - php errors for cool kids
  * @author Filipe Dobreira <http://github.com/filp>
@@ -7,9 +8,8 @@
 namespace Leaf\Exceptions;
 
 use InvalidArgumentException;
-use Serializable;
 
-class Frame implements Serializable
+class Frame
 {
     /**
      * @var array

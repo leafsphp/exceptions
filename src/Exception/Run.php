@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Whoops - php errors for cool kids
  * @author Filipe Dobreira <http://github.com/filp>
@@ -172,6 +173,10 @@ final class Run implements RunInterface
      */
     public function register()
     {
+        if (empty($this->getHandlers())) {
+            $this->pushHandler(new \Leaf\Exception\Handler\PrettyPageHandler);
+        }
+
         if (!$this->isRegistered) {
             // Workaround PHP bug 42098
             // https://bugs.php.net/bug.php?id=42098
@@ -516,7 +521,7 @@ final class Run implements RunInterface
         if (!$handler instanceof HandlerInterface) {
             throw new InvalidArgumentException(
                 "Handler must be a callable, or instance of "
-                . "Leaf\\Exception\\Handler\\HandlerInterface"
+                    . "Leaf\\Exception\\Handler\\HandlerInterface"
             );
         }
 

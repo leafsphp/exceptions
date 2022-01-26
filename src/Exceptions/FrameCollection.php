@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Whoops - php errors for cool kids
  * @author Filipe Dobreira <http://github.com/filp>
@@ -7,17 +8,15 @@
 namespace Leaf\Exceptions;
 
 use ArrayAccess;
-use ArrayIterator;
 use Countable;
 use IteratorAggregate;
-use Serializable;
 use UnexpectedValueException;
 
 /**
  * Exposes a fluent interface for dealing with an ordered list
  * of stack-trace frames.
  */
-class FrameCollection implements ArrayAccess, IteratorAggregate, Serializable, Countable
+class FrameCollection implements ArrayAccess, IteratorAggregate, Countable
 {
     /**
      * @var array[]
@@ -87,18 +86,17 @@ class FrameCollection implements ArrayAccess, IteratorAggregate, Serializable, C
 
     /**
      * @see IteratorAggregate::getIterator
-     * @return ArrayIterator
      */
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
-        return new ArrayIterator($this->frames);
+        return new \ArrayIterator($this->frames);
     }
 
     /**
      * @see ArrayAccess::offsetExists
      * @param int $offset
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return isset($this->frames[$offset]);
     }
@@ -107,7 +105,7 @@ class FrameCollection implements ArrayAccess, IteratorAggregate, Serializable, C
      * @see ArrayAccess::offsetGet
      * @param int $offset
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         return $this->frames[$offset];
     }
@@ -116,7 +114,7 @@ class FrameCollection implements ArrayAccess, IteratorAggregate, Serializable, C
      * @see ArrayAccess::offsetSet
      * @param int $offset
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         throw new \Exception(__CLASS__ . ' is read only');
     }
@@ -125,7 +123,7 @@ class FrameCollection implements ArrayAccess, IteratorAggregate, Serializable, C
      * @see ArrayAccess::offsetUnset
      * @param int $offset
      */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         throw new \Exception(__CLASS__ . ' is read only');
     }
@@ -134,7 +132,7 @@ class FrameCollection implements ArrayAccess, IteratorAggregate, Serializable, C
      * @see Countable::count
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return count($this->frames);
     }
@@ -188,9 +186,9 @@ class FrameCollection implements ArrayAccess, IteratorAggregate, Serializable, C
         $diff = $this->frames;
 
         $parentFrames = $parentFrames->getArray();
-        $p = count($parentFrames)-1;
+        $p = count($parentFrames) - 1;
 
-        for ($i = count($diff)-1; $i >= 0 && $p >= 0; $i--) {
+        for ($i = count($diff) - 1; $i >= 0 && $p >= 0; $i--) {
             /** @var Frame $tailFrame */
             $tailFrame = $diff[$i];
             if ($tailFrame->equals($parentFrames[$p])) {
