@@ -300,7 +300,7 @@ class PrettyPageHandler extends Handler
     /**
      * Get the stack trace frames of the exception currently being handled.
      *
-     * @return \Whoops\Exception\FrameCollection
+     * @return \Leaf\Exceptions\FrameCollection
      */
     protected function getExceptionFrames()
     {
@@ -383,7 +383,7 @@ class PrettyPageHandler extends Handler
             throw new InvalidArgumentException('Expecting callback argument to be callable');
         }
 
-        $this->extraTables[$label] = function (\Whoops\Exception\Inspector $inspector = null) use ($callback) {
+        $this->extraTables[$label] = function (\Leaf\Exceptions\Inspector $inspector = null) use ($callback) {
             try {
                 $result = call_user_func($callback, $inspector);
 

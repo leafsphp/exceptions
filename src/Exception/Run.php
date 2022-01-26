@@ -516,7 +516,7 @@ final class Run implements RunInterface
         if (!$handler instanceof HandlerInterface) {
             throw new InvalidArgumentException(
                 "Handler must be a callable, or instance of "
-                . "Whoops\\Handler\\HandlerInterface"
+                . "Leaf\\Exception\\Handler\\HandlerInterface"
             );
         }
 

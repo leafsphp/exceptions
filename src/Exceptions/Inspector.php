@@ -16,12 +16,12 @@ class Inspector
     private $exception;
 
     /**
-     * @var \Whoops\Exception\FrameCollection
+     * @var \Leaf\Exceptions\FrameCollection
      */
     private $frames;
 
     /**
-     * @var \Whoops\Exception\Inspector
+     * @var \Leaf\Exceptions\Inspector
      */
     private $previousExceptionInspector;
 
@@ -167,7 +167,7 @@ class Inspector
     /**
      * Returns an iterator for the inspected exception's
      * frames.
-     * @return \Whoops\Exception\FrameCollection
+     * @return \Leaf\Exceptions\FrameCollection
      */
     public function getFrames()
     {
