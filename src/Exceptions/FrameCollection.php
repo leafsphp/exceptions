@@ -7,7 +7,6 @@
 
 namespace Leaf\Exceptions;
 
-use ArrayAccess;
 use Countable;
 use IteratorAggregate;
 use UnexpectedValueException;
@@ -16,7 +15,7 @@ use UnexpectedValueException;
  * Exposes a fluent interface for dealing with an ordered list
  * of stack-trace frames.
  */
-class FrameCollection implements ArrayAccess, IteratorAggregate, Countable
+class FrameCollection implements IteratorAggregate, Countable
 {
     /**
      * @var array[]
