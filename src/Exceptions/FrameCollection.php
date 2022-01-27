@@ -105,7 +105,7 @@ class FrameCollection implements ArrayAccess, IteratorAggregate, Countable
      * @see ArrayAccess::offsetGet
      * @param int $offset
      */
-    public function offsetGet($offset): mixed
+    public function offsetGet($offset)
     {
         return $this->frames[$offset];
     }
