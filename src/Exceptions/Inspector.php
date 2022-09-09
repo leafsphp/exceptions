@@ -216,8 +216,8 @@ class Inspector
                 $outerFrames = $this->frames;
                 $newFrames = clone $previousInspector->getFrames();
                 // I assume it will always be set, but let's be safe
-                if (isset($newFrames[0])) {
-                    $newFrames[0]->addComment(
+                if ( 0 < $newFrames->count() ) {
+                    $newFrames->offsetGet( 0 )->addComment(
                         $previousInspector->getExceptionMessage(),
                         'Exception message:'
                     );
