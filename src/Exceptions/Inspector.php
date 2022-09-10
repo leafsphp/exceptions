@@ -144,7 +144,6 @@ class Inspector
         return $this->previousExceptionInspector;
     }
 
-
     /**
      * Returns an array of all previous exceptions for this inspector's exception
      * @return \Throwable[]
@@ -215,13 +214,15 @@ class Inspector
                 // Keep outer frame on top of the inner one
                 $outerFrames = $this->frames;
                 $newFrames = clone $previousInspector->getFrames();
+
                 // I assume it will always be set, but let's be safe
-                if ( 0 < $newFrames->count() ) {
-                    $newFrames->offsetGet( 0 )->addComment(
+                if ($newFrames->count() > 0) {
+                    $newFrames->offsetGet(0)->addComment(
                         $previousInspector->getExceptionMessage(),
                         'Exception message:'
                     );
                 }
+
                 $newFrames->prependFrames($outerFrames->topDiff($newFrames));
                 $this->frames = $newFrames;
             }
@@ -272,10 +273,10 @@ class Inspector
     protected function getFrameFromException($exception)
     {
         return [
-            'file'  => $exception->getFile(),
-            'line'  => $exception->getLine(),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
             'class' => get_class($exception),
-            'args'  => [
+            'args' => [
                 $exception->getMessage(),
             ],
         ];
@@ -290,10 +291,10 @@ class Inspector
     protected function getFrameFromError(ErrorException $exception)
     {
         return [
-            'file'  => $exception->getFile(),
-            'line'  => $exception->getLine(),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
             'class' => null,
-            'args'  => [],
+            'args' => [],
         ];
     }
 
