@@ -8,7 +8,6 @@
 namespace Leaf\Exception;
 
 use InvalidArgumentException;
-use Throwable;
 use Leaf\Exceptions\ErrorException;
 use Leaf\Exceptions\Inspector;
 use Leaf\Exception\Handler\CallbackHandler;
@@ -16,6 +15,7 @@ use Leaf\Exception\Handler\Handler;
 use Leaf\Exception\Handler\HandlerInterface;
 use Leaf\Exception\Util\Misc;
 use Leaf\Exception\Util\SystemFacade;
+use Throwable;
 
 final class Run implements RunInterface
 {
@@ -27,22 +27,22 @@ final class Run implements RunInterface
     /**
      * @var bool
      */
-    private $allowQuit       = true;
+    private $allowQuit = true;
 
     /**
      * @var bool
      */
-    private $sendOutput      = true;
+    private $sendOutput = true;
 
     /**
      * @var integer|false
      */
-    private $sendHttpCode    = 500;
+    private $sendHttpCode = 500;
 
     /**
      * @var integer|false
      */
-    private $sendExitCode    = 1;
+    private $sendExitCode = 1;
 
     /**
      * @var HandlerInterface[]
@@ -439,10 +439,10 @@ final class Run implements RunInterface
      */
     public function handleError($level, $message, $file = null, $line = null)
     {
-        if ($level & $this->system->getErrorReportingLevel()) {
+        if ($level&$this->system->getErrorReportingLevel()) {
             foreach ($this->silencedPatterns as $entry) {
                 $pathMatches = (bool) preg_match($entry["pattern"], $file);
-                $levelMatches = $level & $entry["levels"];
+                $levelMatches = $level&$entry["levels"];
                 if ($pathMatches && $levelMatches) {
                     // Ignore the error, abort handling
                     // See https://github.com/filp/whoops/issues/418
@@ -453,6 +453,12 @@ final class Run implements RunInterface
             // XXX we pass $level for the "code" param only for BC reasons.
             // see https://github.com/filp/whoops/issues/267
             $exception = new ErrorException($message, /*code*/ $level, /*severity*/ $level, $file, $line);
+            $app = \Leaf\Config::get("app")["instance"];
+
+            if ($app && $app->config("log.enabled")) {
+                $app->logger()->error($exception);
+            }
+
             if ($this->canThrowExceptions) {
                 throw $exception;
             } else {
@@ -521,7 +527,7 @@ final class Run implements RunInterface
         if (!$handler instanceof HandlerInterface) {
             throw new InvalidArgumentException(
                 "Handler must be a callable, or instance of "
-                    . "Leaf\\Exception\\Handler\\HandlerInterface"
+                . "Leaf\\Exception\\Handler\\HandlerInterface"
             );
         }
 
