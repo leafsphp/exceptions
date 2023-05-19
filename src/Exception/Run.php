@@ -174,7 +174,11 @@ final class Run implements RunInterface
     public function register()
     {
         if (empty($this->getHandlers())) {
-            $this->pushHandler(new \Leaf\Exception\Handler\PrettyPageHandler);
+            if ((bool) \Leaf\Config::get("debug")) {
+                $this->pushHandler(new \Leaf\Exception\Handler\PrettyPageHandler);
+            } else {
+                $this->pushHandler(new \Leaf\Exception\Handler\CustomHandler);
+            }
         }
 
         if (!$this->isRegistered) {
@@ -439,10 +443,10 @@ final class Run implements RunInterface
      */
     public function handleError($level, $message, $file = null, $line = null)
     {
-        if ($level&$this->system->getErrorReportingLevel()) {
+        if ($level & $this->system->getErrorReportingLevel()) {
             foreach ($this->silencedPatterns as $entry) {
                 $pathMatches = (bool) preg_match($entry["pattern"], $file);
-                $levelMatches = $level&$entry["levels"];
+                $levelMatches = $level & $entry["levels"];
                 if ($pathMatches && $levelMatches) {
                     // Ignore the error, abort handling
                     // See https://github.com/filp/whoops/issues/418
@@ -527,7 +531,7 @@ final class Run implements RunInterface
         if (!$handler instanceof HandlerInterface) {
             throw new InvalidArgumentException(
                 "Handler must be a callable, or instance of "
-                . "Leaf\\Exception\\Handler\\HandlerInterface"
+                    . "Leaf\\Exception\\Handler\\HandlerInterface"
             );
         }
 
