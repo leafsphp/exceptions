@@ -101,7 +101,7 @@ final class Run implements RunInterface
      * Register your handler as the last of all currently registered handlers (to be executed first).
      * Prefer using appendHandler and prependHandler for clarity.
      *
-     * @param Callable|HandlerInterface $handler
+     * @param callable|HandlerInterface $handler
      *
      * @return Run
      *
@@ -174,7 +174,7 @@ final class Run implements RunInterface
     public function register()
     {
         if (empty($this->getHandlers())) {
-            if ((bool) \Leaf\Config::get("debug")) {
+            if (\Leaf\Anchor::toBool(\Leaf\Config::get('debug'))) {
                 $this->pushHandler(new \Leaf\Exception\Handler\PrettyPageHandler);
             } else {
                 $this->pushHandler(new \Leaf\Exception\Handler\CustomHandler);
