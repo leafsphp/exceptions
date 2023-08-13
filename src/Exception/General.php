@@ -66,9 +66,9 @@ class General extends \Exception
         try {
             throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
         } catch (\Throwable $th) {
-            $app = \Leaf\Config::get("app")["instance"];
+            $app = \Leaf\Config::get('app')['instance'];
 
-            if ($app && $app->config("log.enabled")) {
+            if ($app && $app->config('log.enabled')) {
                 $app->logger()->error($th);
             }
 
@@ -186,9 +186,12 @@ class General extends \Exception
      */
     public static function defaultDown()
     {
-        echo static::errorMarkup(
-            'Oops!',
-            '<p>App is under maintainance, please check back soon.</p>'
+        (new \Leaf\Http\Response())->exit(
+            static::errorMarkup(
+                'Oops!',
+                '<p>App is under maintainance, please check back soon.</p>'
+            ),
+            503
         );
     }
 
@@ -227,6 +230,9 @@ class General extends \Exception
             }
         }
 
-        echo self::errorMarkup('Oops!', '<p>A website error has occurred, our team has been notified.</p>');
+        (new \Leaf\Http\Response())->exit(
+            self::errorMarkup('Oops!', '<p>A website error has occurred, our team has been notified.</p>'),
+            500
+        );
     }
 }
