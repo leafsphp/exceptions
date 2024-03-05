@@ -200,9 +200,12 @@ class General extends \Exception
      */
     public static function default404()
     {
-        echo static::errorMarkup(
-            '404',
-            '<p>The page you are looking for could not be found.</p>'
+        (new \Leaf\Http\Response())->exit(
+            static::errorMarkup(
+                '404',
+                '<p>The page you are looking for could not be found.</p>'
+            ),
+            404
         );
     }
 
@@ -211,9 +214,12 @@ class General extends \Exception
      */
     public static function csrf($error = null)
     {
-        echo static::errorMarkup(
-            'Invalid request',
-            "<p>$error</p>" ?? '<p>The page you are looking for has expired.</p>'
+        (new \Leaf\Http\Response())->exit(
+            static::errorMarkup(
+                'Invalid request',
+                "<p>$error</p>" ?? '<p>The page you are looking for has expired.</p>'
+            ),
+            400
         );
     }
 
