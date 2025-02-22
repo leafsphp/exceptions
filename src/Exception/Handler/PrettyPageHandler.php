@@ -832,7 +832,7 @@ class PrettyPageHandler extends Handler
      */
     private function masked(array $superGlobal, $superGlobalName)
     {
-        $blacklisted = $this->blacklist[$superGlobalName];
+        $blacklisted = $this->blacklist[$superGlobalName ?? ''] ?? [];
 
         $values = $superGlobal;
 
