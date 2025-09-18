@@ -1,4 +1,5 @@
 # Leaf Exception (Whoops)
+
 PHP errors for cool kids
 
 [![Total Downloads](https://img.shields.io/packagist/dm/leafs/exception.svg)](https://packagist.org/packages/leafs/exception)
