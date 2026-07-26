@@ -49,5 +49,10 @@
         "psr-4": {
             "Leaf\\": "tests/Whoops/"
         }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-v5.x": "5.0.x-dev"
+        }
     }
 }
