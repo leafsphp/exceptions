@@ -174,6 +174,7 @@ test('breadcrumbs record where in the app they were left', function () {
 
     expect($origin['file'])->toBe(__FILE__);
     expect($origin['line'])->toBeGreaterThan(0);
+    expect($origin['callable'])->toContain('{closure'); // the enclosing test closure
 });
 
 test('crumbs left through the hub point at the caller, not the hub', function () {
@@ -207,9 +208,14 @@ test('peeks export bounded, redacted snapshots of variables', function () {
 
     expect($report->peeks['order']['total'])->toBe(0);
     expect($report->peeks['order']['api_key'])->toBe(Redactor::MASK);
-    expect($report->peeks['deep']['a']['b']['c'])->toBe('[array:1]');
+    // deep-but-small structures survive intact under the node budget
+    expect($report->peeks['deep']['a']['b']['c'])->toBe(['d' => 'too deep']);
     expect($report->peeks['closure'])->toBe('(closure)');
     expect($report->peeks['longText'])->toContain('(900 chars)');
+
+    // ...but a huge structure exhausts the budget and truncates
+    $huge = \Leaf\Crash\Peek::export(array_fill(0, 25, array_fill(0, 25, array_fill(0, 25, 'x'))));
+    expect(json_encode($huge))->toContain('(truncated)');
 });
 
 test('timing spans are cheap to record and ride on captures', function () {
@@ -275,4 +281,34 @@ test('captures automatically carry cheap runtime facts', function () {
 
     expect($report->app['php'])->toBe(PHP_VERSION);
     expect($report->app['memory'])->toContain('MB');
+});
+
+test('the crash() global returns one shared hub', function () {
+    expect(crash())->toBeInstanceOf(Hub::class);
+    expect(crash())->toBe(crash());
+
+    crash()->leaveCrumb('via global');
+    expect(crash()->breadcrumbs()->trail())->not->toBeEmpty();
+});
+
+test('large crumb data is bounded at record time and redacted in reports', function () {
+    $crumbs = new Breadcrumbs();
+
+    // a "model result": deep, wide, with a secret inside
+    $rows = array_fill(0, 50, ['id' => 1, 'nested' => ['deep' => ['deeper' => ['too-deep' => 1]]]]);
+    $crumbs->add('loaded orders', Breadcrumbs::TYPE_QUERY, [
+        'rows' => $rows,
+        'api_token' => 'secret-token',
+    ]);
+
+    $meta = $crumbs->trail()[0]['meta'];
+
+    // bounded: item cap applied (25 + the "more" marker)
+    expect(count($meta['rows']))->toBeLessThanOrEqual(26);
+    // deep-but-small data survives for the tree viewer
+    expect($meta['rows'][0]['nested']['deep']['deeper']['too-deep'])->toBe(1);
+
+    // redaction applies when the trail lands on a report
+    $report = Report::message('checkpoint', ['breadcrumbs' => $crumbs->trail()]);
+    expect($report->breadcrumbs[0]['meta']['api_token'])->toBe(Redactor::MASK);
 });

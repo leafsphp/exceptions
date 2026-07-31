@@ -85,11 +85,15 @@ test('vendor frame runs are grouped', function () {
     }
 });
 
-test('journey steps with a known origin are clickable code targets', function () {
+test('journey steps expand to show their data and recording site', function () {
     $html = renderedCrash();
 
-    expect($html)->toContain('showOrigin(');
-    expect($html)->toContain('step clickable');
+    expect($html)
+        ->toContain('step-detail')
+        ->toContain('inside')
+        ->toContain('recorded');
+    // needle concatenated: the page excerpts this test's own source
+    expect($html)->not->toContain('show' . 'Origin(');
 });
 
 test('ai actions live in one dropdown with prompt copy and json download', function () {
