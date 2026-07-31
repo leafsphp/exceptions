@@ -91,7 +91,7 @@ class Report
         $report->request = $redactor->redact($options['request'] ?? []);
         $report->app = $redactor->redact($options['app'] ?? []);
         $report->user = $redactor->redact($options['user'] ?? []);
-        $report->breadcrumbs = $options['breadcrumbs'] ?? [];
+        $report->breadcrumbs = $redactor->redact($options['breadcrumbs'] ?? []);
 
         $report->chain = static::chain($throwable);
         $report->previous = $report->chain[0] ?? null;
@@ -192,7 +192,7 @@ class Report
         $report->request = $redactor->redact($options['request'] ?? []);
         $report->app = $redactor->redact($options['app'] ?? []);
         $report->user = $redactor->redact($options['user'] ?? []);
-        $report->breadcrumbs = $options['breadcrumbs'] ?? [];
+        $report->breadcrumbs = $redactor->redact($options['breadcrumbs'] ?? []);
         $report->peeks = static::exportPeeks($options['peeks'] ?? [], $redactor);
         $report->timings = $options['timings'] ?? [];
 

@@ -12,16 +12,25 @@ namespace Leaf\Crash;
  */
 class Peek
 {
-    public const MAX_DEPTH = 3;
-    public const MAX_ITEMS = 20;
+    public const MAX_DEPTH = 8;
+    public const MAX_ITEMS = 25;
     public const MAX_STRING = 500;
+
+    /** Overall node budget per export — bounds total size, not just depth */
+    public const MAX_NODES = 400;
 
     /**
      * @param mixed $value
+     * @param int|null $budget Remaining node budget (managed internally)
      * @return mixed A json-safe, size-bounded representation
      */
-    public static function export($value, int $depth = self::MAX_DEPTH)
+    public static function export($value, int $depth = self::MAX_DEPTH, ?int &$budget = null)
     {
+        $budget ??= self::MAX_NODES;
+
+        if (--$budget < 0) {
+            return '(truncated)';
+        }
         if ($value === null || is_bool($value) || is_int($value) || is_float($value)) {
             return $value;
         }
@@ -47,7 +56,7 @@ class Peek
                     break;
                 }
 
-                $exported[$key] = static::export($item, $depth - 1);
+                $exported[$key] = static::export($item, $depth - 1, $budget);
             }
 
             return $exported;
@@ -71,7 +80,7 @@ class Peek
                     break;
                 }
 
-                $exported[$key] = static::export($item, $depth - 1);
+                $exported[$key] = static::export($item, $depth - 1, $budget);
             }
 
             return $exported;

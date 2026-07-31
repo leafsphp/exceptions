@@ -12,32 +12,13 @@
 
 $groups = \Leaf\Crash\Renderer\HtmlRenderer::groupFrames($frames);
 
-// journey steps with a recorded origin become clickable code targets,
-// appended after the stack frames in the same excerpt data
-$crumbTargets = [];
-$extraFrames = [];
-
-foreach ($report->breadcrumbs as $ci => $crumb) {
-    $origin = is_array($crumb) ? ($crumb['origin'] ?? null) : null;
-
-    if ($origin && !empty($origin['file'])) {
-        $crumbFrame = new \Leaf\Crash\Frame($origin['file'], (int) $origin['line']);
-        $crumbFrame->loadExcerpt();
-
-        if ($crumbFrame->excerpt) {
-            $crumbTargets[$ci] = count($frames) + count($extraFrames);
-            $extraFrames[] = $crumbFrame;
-        }
-    }
-}
-
 $framesJson = json_encode(array_map(fn ($f) => [
     'file' => $f->file,
     'line' => $f->line,
     'callable' => $f->callable(),
     'isApplication' => $f->isApplication,
     'excerpt' => (object) $f->excerpt,
-], array_merge($frames, $extraFrames)), JSON_PARTIAL_OUTPUT_ON_ERROR);
+], $frames), JSON_PARTIAL_OUTPUT_ON_ERROR);
 
 $editorSchemes = [
     'vscode' => 'vscode://file/%s:%d',
@@ -78,9 +59,56 @@ if (!empty($options['projectContext'])) {
     ];
 }
 
+/**
+ * Render exported data as a collapsible json tree, devtools style.
+ * Cutoff markers from Peek ("[array:2]", "(truncated)", ...) show muted.
+ */
+$tree = function ($value, int $depth = 0) use (&$tree, $e): string {
+    if (is_array($value)) {
+        $isList = array_is_list($value);
+        $badge = $isList ? '[' . count($value) . ']' : '{' . count($value) . '}';
+        $rows = '';
+
+        foreach ($value as $key => $item) {
+            if (is_array($item)) {
+                $child = $tree($item, $depth + 1);
+                $childBadge = array_is_list($item) ? '[' . count($item) . ']' : '{' . count($item) . '}';
+                $rows .= '<details class="jt"' . ($depth < 1 ? ' open' : '') . '><summary><span class="jt-k">' . $e($key) . '</span> <span class="jt-b">' . $childBadge . '</span></summary>' . $child . '</details>';
+            } else {
+                $rows .= '<div class="jt-row"><span class="jt-k">' . $e($key) . '</span> : ' . $tree($item, $depth + 1) . '</div>';
+            }
+        }
+
+        return $depth === 0
+            ? '<div class="jt-root"><div class="jt-row"><span class="jt-b">' . $badge . '</span></div>' . $rows . '</div>'
+            : $rows;
+    }
+
+    if (is_string($value)) {
+        if (preg_match('/^(\[array:\d+\]|\(object [^)]+\)|\(closure\)|\(truncated\)|\(resource:[^)]+\)|\(\d+ more\)|\(more\))$/', $value)) {
+            return '<span class="jt-cut">' . $e($value) . '</span>';
+        }
+
+        return '<span class="jt-s">"' . $e($value) . '"</span>';
+    }
+
+    if (is_bool($value)) {
+        return '<span class="jt-x">' . ($value ? 'true' : 'false') . '</span>';
+    }
+
+    if ($value === null) {
+        return '<span class="jt-x">null</span>';
+    }
+
+    return '<span class="jt-n">' . $e($value) . '</span>';
+};
+
 $levelColors = ['error' => 'var(--red)', 'warning' => 'var(--amber)', 'info' => 'var(--blue)', 'debug' => 'var(--muted)'];
 $levelColor = $levelColors[$report->level] ?? 'var(--red)';
 $sectionNumber = 0;
+
+$logo = @file_get_contents(__DIR__ . '/../assets/logo-circle.png');
+$logo = $logo ? 'data:image/png;base64,' . base64_encode($logo) : null;
 ?>
 <!doctype html>
 <html lang="en">
@@ -98,13 +126,22 @@ $sectionNumber = 0;
         --code-bg: #1E1714; --code-text: #EBE1D7; --code-num: #6B5B4E; --code-hit: #4A2013; --code-hit-text: #FFB899;
        
     }
-    [data-theme="dark"] {
+    /* follows the system theme; an explicit data-theme (set by the toggle) wins */
+    @media (prefers-color-scheme: dark) {
+        body:not([data-theme="light"]) {
         --bg: #0A0807; --panel: #110E0B; --panel-2: #1A1512; --line: #2D2720; --line-soft: #221D17;
         --text: #EBE1D7; --muted: #A89080; --faint: #6B5B4E;
         --brand: #E8873A; --brand-hover: #F5B731; --gold: #F5B731;
         --red: #FF7A5C; --red-soft: #331410; --amber: #F5B731; --amber-soft: #2A2008; --blue: #89ddff; --green: #7CC79A;
         --code-bg: #0A0807; --code-text: #DCD2C6; --code-num: #4A3E33; --code-hit: #47191d; --code-hit-text: #FFB899;
-       
+        }
+    }
+    body[data-theme="dark"] {
+        --bg: #0A0807; --panel: #110E0B; --panel-2: #1A1512; --line: #2D2720; --line-soft: #221D17;
+        --text: #EBE1D7; --muted: #A89080; --faint: #6B5B4E;
+        --brand: #E8873A; --brand-hover: #F5B731; --gold: #F5B731;
+        --red: #FF7A5C; --red-soft: #331410; --amber: #F5B731; --amber-soft: #2A2008; --blue: #89ddff; --green: #7CC79A;
+        --code-bg: #0A0807; --code-text: #DCD2C6; --code-num: #4A3E33; --code-hit: #47191d; --code-hit-text: #FFB899;
     }
     * { box-sizing: border-box; }
     body {
@@ -123,9 +160,9 @@ $sectionNumber = 0;
     /* top bar */
     .bar { display: flex; align-items: center; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--line); margin-bottom: 44px; }
     .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 15px; letter-spacing: -.02em; }
-    .brand .leaf { width: 22px; height: 22px; border-radius: 50%; background: #262019; position: relative; }
-    [data-theme="dark"] .brand .leaf { background: var(--panel-2); }
-    .brand .leaf::after { content: ""; position: absolute; inset: 6px 6px 6px 10px; border-radius: 0 8px 0 8px; background: var(--gold); }
+    .brand img.leaf { width: 24px; height: 24px; border-radius: 50%; display: block; }
+    .brand span.leaf { width: 22px; height: 22px; border-radius: 50%; background: #262019; position: relative; }
+    .brand span.leaf::after { content: ""; position: absolute; inset: 6px 6px 6px 10px; border-radius: 0 8px 0 8px; background: var(--gold); }
     .bar .spacer { flex: 1; }
     .btn {
         font-size: 13px; padding: 7px 14px; border-radius: 7px; border: 1px solid var(--line);
@@ -227,10 +264,36 @@ $sectionNumber = 0;
     .journey .type { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); min-width: 92px; }
     .journey .what { font-size: 13px; overflow-wrap: anywhere; }
     .journey .meta-inline { color: var(--faint); font-size: 12px; }
-    .journey .step.clickable { cursor: pointer; }
-    .journey .step.clickable:hover { background: var(--panel-2); }
-    .journey .step.clickable:hover .type { color: var(--brand); }
-    .journey .step.selected { background: var(--panel-2); box-shadow: inset 2px 0 0 var(--brand); }
+    .journey .step-block { border-bottom: 1px solid var(--line-soft); }
+    .journey .step-block:last-child { border-bottom: 0; }
+    .journey .step-block .step { border-bottom: 0; cursor: pointer; list-style: none; }
+    .journey .step-block .step::-webkit-details-marker { display: none; }
+    .journey .step-block .step.static { cursor: default; }
+    .journey .step-block .step:not(.static):hover { background: var(--panel-2); }
+    .journey .step-block[open] .step { background: var(--panel-2); }
+    .journey .step-detail { padding: 2px 20px 14px 46px; font-size: 12px; }
+    .journey .step-detail .ed { color: var(--faint); text-decoration: none; }
+    .journey .crumb-data, .peek-tree {
+        margin: 8px 0 4px; padding: 10px 16px; background: var(--code-bg); color: var(--code-text);
+        border-radius: 6px; font-size: 12px; line-height: 1.7; overflow: auto; max-height: 300px;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+    }
+    .peek-tree { margin: 0 20px 16px 40px; }
+    .jt, .jt-row { padding-left: 18px; }
+    .jt-root > .jt, .jt-root > .jt-row { padding-left: 0; }
+    .jt > *:not(summary) { border-left: 1px solid color-mix(in srgb, var(--code-num) 40%, transparent); margin-left: 3px; }
+    .jt summary { cursor: pointer; list-style: none; user-select: none; margin-left: -18px; padding-left: 18px; }
+    .jt summary::-webkit-details-marker { display: none; }
+    .jt summary::before { content: "▸"; color: var(--code-num); display: inline-block; width: 14px; margin-left: -14px; font-size: 10px; }
+    .jt[open] > summary::before { content: "▾"; }
+    .jt summary:hover .jt-k { color: var(--code-text); }
+    .jt-k { color: var(--muted); }
+    .jt-b { color: var(--code-num); font-size: 11px; }
+    .jt-s { color: #A8C7A0; }
+    .jt-n { color: var(--gold); }
+    .jt-x { color: var(--blue); }
+    .jt-cut { color: var(--code-num); font-style: italic; }
+    .journey .step-detail .ed:hover { color: var(--brand); }
 
     /* context: three-column hairline grid */
     .ctxgrid { display: grid; grid-template-columns: repeat(3, 1fr); }
@@ -284,10 +347,10 @@ $sectionNumber = 0;
     ::selection { background: var(--brand); color: #FFF6EE; }
 </style>
 </head>
-<body data-theme="light">
+<body>
 <div class="wrap">
     <div class="bar">
-        <div class="brand display"><span class="leaf"></span> Leaf PHP</div>
+        <div class="brand display"><?php if ($logo): ?><img class="leaf" src="<?= $logo ?>" alt="Leaf PHP" width="24" height="24"><?php else: ?><span class="leaf"></span><?php endif; ?> Leaf PHP</div>
         <span class="eyebrow">crash report</span>
         <div class="spacer"></div>
         <button class="btn" onclick="copyMarkdown()">⧉ Copy as Markdown</button>
@@ -389,16 +452,41 @@ $sectionNumber = 0;
         </div>
         <div class="journey">
             <?php foreach ($report->breadcrumbs as $ci => $crumb): ?>
-                <div class="step<?= isset($crumbTargets[$ci]) ? ' clickable' : '' ?>"<?= isset($crumbTargets[$ci]) ? ' onclick="showOrigin(' . $crumbTargets[$ci] . ', this)" title="Show the code that recorded this step"' : '' ?>>
-                    <span class="dot"></span>
-                    <span class="type"><?= $e(is_array($crumb) ? ($crumb['type'] ?? 'action') : 'log') ?></span>
-                    <span class="what">
-                        <?= $e(is_array($crumb) ? ($crumb['message'] ?? '') : $crumb) ?>
-                        <?php if (is_array($crumb) && !empty($crumb['meta'])): ?>
-                            <span class="meta-inline mono"><?= $e(json_encode($crumb['meta'])) ?></span>
-                        <?php endif; ?>
-                    </span>
-                </div>
+                <?php
+                $crumbMeta = is_array($crumb) ? ($crumb['meta'] ?? []) : [];
+                $crumbOrigin = is_array($crumb) ? ($crumb['origin'] ?? null) : null;
+                $crumbAt = is_array($crumb) ? ($crumb['at'] ?? null) : null;
+                $expandable = $crumbMeta || $crumbOrigin || $crumbAt;
+                ?>
+                <details class="step-block">
+                    <summary class="step<?= $expandable ? '' : ' static' ?>">
+                        <span class="dot"></span>
+                        <span class="type"><?= $e(is_array($crumb) ? ($crumb['type'] ?? 'action') : 'log') ?></span>
+                        <span class="what"><?= $e(is_array($crumb) ? ($crumb['message'] ?? '') : $crumb) ?></span>
+                    </summary>
+                    <?php if ($expandable): ?>
+                        <div class="step-detail mono">
+                            <?php if ($crumbMeta): ?>
+                                <?php $metaJson = json_encode($crumbMeta, JSON_UNESCAPED_SLASHES | JSON_PARTIAL_OUTPUT_ON_ERROR); ?>
+                                <?php if (mb_strlen($metaJson) <= 80): ?>
+                                    <div class="kvrow"><span class="k">data</span><span class="leader"></span><span class="v"><?= $e($metaJson) ?></span></div>
+                                <?php else: ?>
+                                    <div class="kvrow"><span class="k">data</span><span class="leader"></span><span class="v"><?= $e(count($crumbMeta)) ?> field<?= count($crumbMeta) === 1 ? '' : 's' ?></span></div>
+                                    <div class="crumb-data"><?= $tree($crumbMeta) ?></div>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                            <?php if ($crumbAt): ?>
+                                <div class="kvrow"><span class="k">at</span><span class="leader"></span><span class="v"><?= $e($crumbAt) ?></span></div>
+                            <?php endif; ?>
+                            <?php if ($crumbOrigin && !empty($crumbOrigin['callable'])): ?>
+                                <div class="kvrow"><span class="k">inside</span><span class="leader"></span><span class="v"><?= $e($crumbOrigin['callable']) ?></span></div>
+                            <?php endif; ?>
+                            <?php if ($crumbOrigin && !empty($crumbOrigin['file'])): ?>
+                                <div class="kvrow"><span class="k">recorded</span><span class="leader"></span><span class="v"><?= $e($crumbOrigin['file']) ?>:<?= $e($crumbOrigin['line']) ?> <a class="ed" href="<?= $e($editorUrl($crumbOrigin['file'], $crumbOrigin['line'])) ?>">‹›</a></span></div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </details>
             <?php endforeach; ?>
         </div>
     </div>
@@ -471,7 +559,7 @@ foreach ($sections as $label => $section): ?>
             <?php foreach ($report->peeks as $name => $value): ?>
                 <details class="peek">
                     <summary><span class="peekname"><?= $e($name) ?></span><span class="peekhint"><?= $e(is_scalar($value) || $value === null ? var_export($value, true) : gettype($value)) ?></span></summary>
-                    <pre><?= $e(json_encode($value, JSON_PRETTY_PRINT | JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_SLASHES)) ?></pre>
+                    <div class="peek-tree"><?= is_array($value) ? $tree($value) : $tree(['value' => $value]) ?></div>
                 </details>
             <?php endforeach; ?>
         </div>
@@ -524,12 +612,6 @@ foreach ($sections as $label => $section): ?>
             : '<div class="empty">No source available for this frame.</div>';
     }
 
-    function showOrigin(index, step) {
-        document.querySelectorAll('.journey .step').forEach(el => el.classList.toggle('selected', el === step));
-        selectFrame(index);
-        document.getElementById('code-pane').scrollIntoView({behavior: 'smooth', block: 'center'});
-    }
-
     function copyPrompt() {
         navigator.clipboard.writeText(PROMPT).then(() => toast('Prompt copied. Paste it into any assistant'));
     }
@@ -565,7 +647,9 @@ foreach ($sections as $label => $section): ?>
 
     function toggleTheme() {
         const b = document.body;
-        b.dataset.theme = b.dataset.theme === 'dark' ? 'light' : 'dark';
+        const effective = b.dataset.theme
+            || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        b.dataset.theme = effective === 'dark' ? 'light' : 'dark';
     }
 
     selectFrame(<?= $activeIndex ?>);

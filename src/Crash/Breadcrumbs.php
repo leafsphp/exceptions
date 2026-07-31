@@ -40,7 +40,7 @@ class Breadcrumbs
         $this->trail[] = [
             'type' => $type,
             'message' => $message,
-            'meta' => $meta,
+            'meta' => $meta === [] ? [] : Peek::export($meta),
             'at' => date('c'),
             'origin' => $this->origin(),
         ];
@@ -76,11 +76,22 @@ class Breadcrumbs
      */
     protected function origin(): ?array
     {
-        foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 8) as $frame) {
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 8);
+
+        foreach ($trace as $index => $frame) {
             $file = $frame['file'] ?? null;
 
             if ($file && strpos($file, __DIR__) !== 0) {
-                return ['file' => $file, 'line' => $frame['line'] ?? 0];
+                $enclosing = $trace[$index + 1] ?? null;
+                $callable = $enclosing
+                    ? (isset($enclosing['class']) ? $enclosing['class'] . '::' : '') . $enclosing['function']
+                    : null;
+
+                return [
+                    'file' => $file,
+                    'line' => $frame['line'] ?? 0,
+                    'callable' => $callable,
+                ];
             }
         }
 
