@@ -39,9 +39,9 @@ class Hub
      *
      * @param array<string, mixed> $meta
      */
-    public function leaveCrumb(string $message, string $type = Breadcrumbs::TYPE_ACTION, array $meta = []): self
+    public function leaveCrumb(string $message, string $type = Breadcrumbs::TYPE_ACTION, array $meta = [], bool $withOrigin = true): self
     {
-        $this->breadcrumbs->add($message, $type, $meta);
+        $this->breadcrumbs->add($message, $type, $meta, $withOrigin);
 
         return $this;
     }
