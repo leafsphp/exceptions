@@ -17,6 +17,10 @@ class Breadcrumbs
     public const TYPE_REQUEST = 'request';
     public const TYPE_NAVIGATION = 'navigation';
     public const TYPE_ACTION = 'action';
+    public const TYPE_HTTP = 'http';
+    public const TYPE_CACHE = 'cache';
+    public const TYPE_VIEW = 'view';
+    public const TYPE_JOB = 'job';
 
     /** @var array<int, array<string, mixed>> */
     protected array $trail = [];
