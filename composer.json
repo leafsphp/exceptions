@@ -38,13 +38,12 @@
         "psr/log": "^1.0.1 || ^2.0 || ^3.0"
     },
     "require-dev": {
-        "leafs/alchemy": "v5.x-dev",
-        "friendsofphp/php-cs-fixer": "^3.66",
+        "leafs/alchemy": "^5.0",
+        "friendsofphp/php-cs-fixer": "*",
         "pestphp/pest": "*"
     },
     "suggest": {
-        "symfony/var-dumper": "Pretty print complex values better with var-dumper available",
-        "whoops/soap": "Formats errors as SOAP responses"
+        "symfony/var-dumper": "Pretty print complex values better with var-dumper available"
     },
     "autoload": {
         "psr-4": {
