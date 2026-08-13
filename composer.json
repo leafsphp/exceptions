@@ -13,11 +13,6 @@
     "homepage": "https://github.com/leafsphp/exception",
     "authors": [
         {
-            "name": "Filipe Dobreira",
-            "homepage": "https://github.com/filp",
-            "role": "Developer"
-        },
-        {
             "name": "Michael Darko",
             "email": "mickdd22@gmail.com",
             "homepage": "https://mychi.netlify.app",
@@ -52,11 +47,6 @@
         "files": [
             "src/functions.php"
         ]
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Leaf\\": "tests/Whoops/"
-        }
     },
     "config": {
         "allow-plugins": {
