@@ -235,6 +235,27 @@ class Report
     /**
      * @return array<string, mixed>
      */
+    /**
+     * Render the report as plain text — for consoles, logs, and anywhere
+     * HTML has no business being.
+     */
+    public function toText(): string
+    {
+        $text = "{$this->exception}: {$this->message}\n";
+
+        foreach ($this->frames as $index => $frame) {
+            $location = $frame->file ? "{$frame->file}:{$frame->line}" : '[internal]';
+            $callable = $frame->callable();
+            $text .= sprintf("  #%d %s%s\n", $index, $location, $callable ? " — {$callable}()" : '');
+        }
+
+        foreach ($this->chain as $caused) {
+            $text .= "Caused by {$caused['exception']}: {$caused['message']}\n";
+        }
+
+        return $text;
+    }
+
     public function toArray(): array
     {
         return [

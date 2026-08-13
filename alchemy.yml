@@ -1,7 +1,5 @@
-# scoped to the new crash engine — the legacy whoops fork (src/Exception,
-# src/Exceptions) is being replaced and is intentionally left untouched
 app:
-  - src/Crash
+  - src
 
 tests:
   engine: pest
