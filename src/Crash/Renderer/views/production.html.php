@@ -1,9 +1,19 @@
+<?php
+// parameterized status page — included with no vars it renders the
+// classic production 500, which keeps Handler::productionPage() working
+$eyebrow = $eyebrow ?? 'error 500';
+$title = $title ?? 'Something went wrong';
+$message = $message ?? 'We hit an unexpected problem while handling your request. It has been recorded and we are on it.';
+$actionUrl = $actionUrl ?? '/';
+$actionLabel = $actionLabel ?? 'Back to safety';
+$e = fn ($value) => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+?>
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Something went wrong</title>
+<title><?= $e($title) ?></title>
 <style>
     :root { --bg: #FAF7F2; --text: #262019; --muted: #6B5B4E; --line: #E8E0D8; --brand: #D4652E; }
     @media (prefers-color-scheme: dark) {
@@ -38,10 +48,10 @@ $logo = $logo ? 'data:image/png;base64,' . base64_encode($logo) : null;
 <body>
     <div class="card">
         <?php if ($logo): ?><img src="<?= $logo ?>" alt="" width="42" height="42" style="border-radius: 50%; margin-bottom: 18px;"><?php endif; ?>
-        <div class="eyebrow">error 500</div>
-        <h1>Something went wrong</h1>
-        <p>We hit an unexpected problem while handling your request. It has been recorded and we are on it.</p>
-        <a href="/">Back to safety</a>
+        <div class="eyebrow"><?= $e($eyebrow) ?></div>
+        <h1><?= $e($title) ?></h1>
+        <p><?= $e($message) ?></p>
+        <a href="<?= $e($actionUrl) ?>"><?= $e($actionLabel) ?></a>
     </div>
 </body>
 </html>
