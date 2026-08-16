@@ -134,6 +134,10 @@ class Handler
             return ($this->renderer)($report, $this->debug);
         }
 
+        if (\PHP_SAPI === 'cli' || \PHP_SAPI === 'phpdbg') {
+            return $report->toText() . "\n";
+        }
+
         if ($this->debug) {
             return (new HtmlRenderer())->render($report, $this->options);
         }

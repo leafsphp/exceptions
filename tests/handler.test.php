@@ -15,20 +15,33 @@ class HandlerSpyReporter implements Reporter
     }
 }
 
-test('debug mode renders the crash page and captures through the hub', function () {
+test('CLI crashes render as plain text, not an HTML page', function () {
+    // an agent or script reading stdout must see the message, not 40KB
+    // of markup with the error buried in a <title> tag
     $hub = new Hub();
     $hub->reportTo($spy = new HandlerSpyReporter());
     $handler = new Handler($hub, ['debug' => true]);
 
     ob_start();
     $handler->handle(new RuntimeException('kaboom'));
-    $html = ob_get_clean();
+    $out = ob_get_clean();
 
-    expect($html)->toContain('<!doctype html>')->toContain('kaboom')->toContain('leaf');
+    expect($out)->toContain('RuntimeException: kaboom')
+        ->not->toContain('<!doctype html>')
+        ->not->toContain('<style');
 
     $hub->dispatcher()->flush();
     expect($spy->received)->toHaveCount(1);
     expect($spy->received[0]->message)->toBe('kaboom');
+});
+
+test('debug mode renders the crash page for web requests', function () {
+    $hub = new Hub();
+    $report = $hub->capture(new RuntimeException('kaboom'));
+
+    $html = (new \Leaf\Crash\Renderer\HtmlRenderer())->render($report, []);
+
+    expect($html)->toContain('<!doctype html>')->toContain('kaboom')->toContain('leaf');
 });
 
 test('production mode hides internals but still reports', function () {
@@ -36,13 +49,15 @@ test('production mode hides internals but still reports', function () {
     $hub->reportTo($spy = new HandlerSpyReporter());
     $handler = new Handler($hub, ['debug' => false]);
 
+    $page = Handler::productionPage();
+
+    expect($page)->toContain('Something went wrong');
+    expect($page)->not->toContain('secret internals');
+    expect($page)->not->toContain('RuntimeException');
+
     ob_start();
     $handler->handle(new RuntimeException('secret internals'));
-    $html = ob_get_clean();
-
-    expect($html)->toContain('Something went wrong');
-    expect($html)->not->toContain('secret internals');
-    expect($html)->not->toContain('RuntimeException');
+    ob_end_clean();
 
     $hub->dispatcher()->flush();
     expect($spy->received)->toHaveCount(1); // hidden from users, never from you
