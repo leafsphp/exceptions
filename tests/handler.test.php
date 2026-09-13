@@ -78,3 +78,25 @@ test('a custom renderer takes over output, eg for JSON APIs', function () {
     expect($decoded['error'])->toBe('internal');
     expect($decoded['id'])->toHaveLength(16);
 });
+
+test('deprecations stay warnings instead of crashing the app', function () {
+    $handler = (new Handler(new Hub(), ['debug' => true]))->register();
+    $previous = error_reporting(E_ALL);
+
+    try {
+        $thrown = null;
+
+        try {
+            @trigger_error('old api', E_USER_DEPRECATED);
+            trigger_error('old api', E_USER_DEPRECATED);
+        } catch (ErrorException $e) {
+            $thrown = $e;
+        }
+
+        expect($thrown)->toBeNull();
+        expect(fn () => trigger_error('real problem', E_USER_WARNING))->toThrow(ErrorException::class, 'real problem');
+    } finally {
+        error_reporting($previous);
+        $handler->unregister();
+    }
+});
